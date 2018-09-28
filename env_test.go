@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"strconv"
@@ -44,6 +45,7 @@ type Config struct {
 	UNumbers64      []uint64        `env:"UNUMBERS64"`
 	Bools           []bool          `env:"BOOLS"`
 	Duration        time.Duration   `env:"DURATION"`
+	URL             *url.URL        `env:"URL"`
 	Float32         float32         `env:"FLOAT32"`
 	Float64         float64         `env:"FLOAT64"`
 	Float32s        []float32       `env:"FLOAT32S"`
@@ -77,6 +79,7 @@ func TestParsesEnv(t *testing.T) {
 	os.Setenv("UNUMBERS64", "1,2,214748364011,9147483641")
 	os.Setenv("BOOLS", "t,TRUE,0,1")
 	os.Setenv("DURATION", "1s")
+	os.Setenv("URL", "http://example.com/test")
 	os.Setenv("FLOAT32", "3.40282346638528859811704183484516925440e+38")
 	os.Setenv("FLOAT64", "1.797693134862315708145274237317043567981e+308")
 	os.Setenv("FLOAT32S", "1.0,2.0,3.0")
@@ -108,6 +111,8 @@ func TestParsesEnv(t *testing.T) {
 	assert.Equal(t, []bool{true, true, false, true}, cfg.Bools)
 	d1, _ := time.ParseDuration("1s")
 	assert.Equal(t, d1, cfg.Duration)
+	u, _ := url.Parse("http://example.com/test")
+	assert.Equal(t, u, cfg.URL)
 	f32 := float32(3.40282346638528859811704183484516925440e+38)
 	assert.Equal(t, f32, cfg.Float32)
 	f64 := float64(1.797693134862315708145274237317043567981e+308)

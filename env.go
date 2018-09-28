@@ -4,6 +4,7 @@ import (
 	"encoding"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"reflect"
 	"strconv"
@@ -217,7 +218,16 @@ func set(field reflect.Value, refType reflect.StructField, value string, funcMap
 	default:
 		parserFunc, ok := funcMap[refType.Type]
 		if !ok {
-			return handleTextUnmarshaler(field, value)
+			if refType.Type.String() == "*url.URL" {
+				dValue, err := url.Parse(value)
+				if err != nil {
+					return err
+				}
+				field.Set(reflect.ValueOf(dValue))
+				return nil
+			} else {
+				return handleTextUnmarshaler(field, value)
+			}
 		}
 		val, err := parserFunc(value)
 		if err != nil {
